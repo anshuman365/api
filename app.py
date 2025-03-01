@@ -9,7 +9,7 @@ app = Flask(__name__)
 def home():
     return render_template("index.html", message="Welcome to the Resume Screening API!")
 
-@app.route("/analyze", methods=["POST"])
+@app.route("/analyze", methods=["POST","GET"])
 def analyze_resume():
     """API endpoint to analyze resumes."""
     if "file" not in request.files:
