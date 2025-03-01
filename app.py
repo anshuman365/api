@@ -1,13 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from resume_parser import extract_resume_data
 from job_matcher import match_resume_with_job
-from models import score_candidate  # Import AI scoring model
+from models import score_candidate  
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return jsonify({"message": "Resume Screening API is running!"})
+    return render_template("index.html", message="Welcome to the Resume Screening API!")
 
 @app.route("/analyze", methods=["POST"])
 def analyze_resume():
@@ -35,7 +35,8 @@ def analyze_resume():
         "ai_candidate_score": ai_score
     }
 
-    return jsonify(response)
+    return render_template("index.html", response=response)
 
 if __name__ == "__main__":
     app.run(debug=True)
+    

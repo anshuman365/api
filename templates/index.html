@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening API</title>
+</head>
+<body>
+    <h1>Resume Screening Results</h1>
+    
+    {% if error %}
+        <p style="color: red;">Error: {{ error }}</p>
+    {% endif %}
+    
+    {% if response %}
+        <h3>Resume Data:</h3>
+        <ul>
+            <li>Name: {{ response.resume_data.name }}</li>
+            <li>Email: {{ response.resume_data.email }}</li>
+            <li>Phone: {{ response.resume_data.phone }}</li>
+            <li>Skills: {{ response.resume_data.skills }}</li>
+            <li>Experience: {{ response.resume_data.experience }}</li>
+        </ul>
+        <h3>Job Match Score: {{ response.job_match_score }}%</h3>
+    {% endif %}
+</body>
+</html>
