@@ -7,6 +7,8 @@ from tensorflow import keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import json
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU for TensorFlow
 
 class VirtualCPU:
     def __init__(self, cpu_id):
