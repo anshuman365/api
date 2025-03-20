@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Manager</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Manager</h1>
+
+        <h3>Show Databases</h3>
+        <button onclick="showDatabases()">Show Databases</button>
+
+        <h3>Create Database</h3>
+        Database Name: <input type="text" id="db_name">
+        <button onclick="createDatabase()">Create Database</button>
+
+        <h3>Show Tables</h3>
+        Database Name: <input type="text" id="db_name_tables">
+        <button onclick="showTables()">Show Tables</button>
+
+        <h3>Create Table</h3>
+        Database Name: <input type="text" id="db_name_create_table"><br>
+        Table Name: <input type="text" id="table_name"><br>
+        Columns (comma-separated): <input type="text" id="columns"><br>
+        <button onclick="createTable()">Create Table</button>
+
+        <h3>Insert Data</h3>
+        Table Name: <input type="text" id="insert_table"><br>
+        Values (comma-separated): <input type="text" id="values"><br>
+        <button onclick="insertData()">Insert Data</button>
+
+        <h3>Fetch Data</h3>
+        Table Name: <input type="text" id="fetch_table"><br>
+        <button onclick="fetchData()">Fetch Data</button>
+
+        <h3>Update Data</h3>
+        Table Name: <input type="text" id="update_table"><br>
+        Set Values (e.g., column='value'): <input type="text" id="set_values"><br>
+        Condition (e.g., id=1): <input type="text" id="condition_update"><br>
+        <button onclick="updateData()">Update Data</button>
+
+        <h3>Delete Data</h3>
+        Table Name: <input type="text" id="delete_table"><br>
+        Condition (e.g., id=1): <input type="text" id="condition_delete"><br>
+        <button onclick="deleteData()">Delete Data</button>
+
+        <h3>Count Rows</h3>
+        Table Name: <input type="text" id="count_table"><br>
+        <button onclick="countRows()">Count Rows</button>
+
+        <h3>Describe Table</h3>
+        Table Name: <input type="text" id="describe_table"><br>
+        <button onclick="describeTable()">Describe Table</button>
+
+        <div class="output" id="output"></div>
+    </div>
+</body>
+</html>
