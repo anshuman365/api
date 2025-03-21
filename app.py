@@ -219,5 +219,32 @@ def describe_table():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+@app.route("/run_query", methods=["POST"])
+def run_query():
+    data = request.json
+    query = data.get("query")
+
+    if not query:
+        return jsonify({"status": "error", "message": "SQL query is required"}), 400
+
+    # Only allow SELECT queries for security reasons
+    if not query.strip().lower().startswith("select"):
+        return jsonify({"status": "error", "message": "Only SELECT queries are allowed"}), 403
+
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        columns = [desc[0] for desc in cursor.description]
+        cursor.close()
+        conn.close()
+
+        result = [dict(zip(columns, row)) for row in rows]
+        return jsonify({"status": "success", "data": result}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+ 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
