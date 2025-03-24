@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
 )
 
 # Define API URL
-API_URL = "https://my-sql-api-service.onrender.com"
-
+#API_URL = "https://my-sql-api-service.onrender.com"
+API_URL = "http://127.0.0.1:5000"
 
 class DatabaseClient(QWidget):
     def __init__(self):
@@ -278,51 +278,53 @@ class DatabaseClient(QWidget):
         QMessageBox.information(self, "Result", result.get("message", "Delete response"))
         
     def run_custom_query(self):
-        """Runs a user-defined SELECT query securely."""
+        """Runs a user-defined SQL query securely."""
         query, ok = QInputDialog.getMultiLineText(self, "Run SQL Query", "Enter your SQL query:")
-
         if not ok or not query.strip():
             return  # Do nothing if user cancels or submits an empty query
 
-        # **Only allow SELECT queries**
-        if not query.strip().lower().startswith("select"):
-            QMessageBox.critical(self, "Error", "Only SELECT queries are allowed!")
+    # Ensure query ends with a semicolon
+        if not query.strip().endswith(";"):
+            query = query.strip() + ";"
+
+    # Validate query type
+        if not query.strip().lower().startswith(("select", "desc", "describe")):
+            QMessageBox.critical(self, "Error", "Only SELECT and DESCRIBE queries are allowed!")
             return
 
         try:
             response = requests.post(f"{API_URL}/run_query", json={"query": query.strip()})
-
-            # **Check if the response is valid**
-            if response.status_code != 200 or not response.text.strip():
-                QMessageBox.critical(self, "Error", "Invalid response from the server!")
-                return
-
-            try:
-                result = response.json()  # Attempt to parse JSON
-            except requests.exceptions.JSONDecodeError:
-                QMessageBox.critical(self, "Error", "Invalid JSON response from server!")
-                return
+            result = response.json()
 
             if result.get("status") == "success":
-                data = result.get("data", [])
+                if "data" in result:
+                # Display data in table for SELECT queries
+                    data = result["data"]
+                    if data:
+                        columns = list(data[0].keys())
+                        self.data_table.setColumnCount(len(columns))
+                        self.data_table.setRowCount(len(data))
+                        self.data_table.setHorizontalHeaderLabels(columns)
 
-                if not data:
-                    QMessageBox.information(self, "Info", "Query executed successfully, but no data returned.")
-                    return
+                        for row_idx, row_data in enumerate(data):
+                            for col_idx, col_name in enumerate(columns):
+                                self.data_table.setItem(row_idx, col_idx, QTableWidgetItem(str(row_data[col_name])))
+                    else:
+                        QMessageBox.information(self, "Info", "Query executed successfully but returned no data!")
+                elif "table_structure" in result:
+                # Display table structure for DESCRIBE queries
+                    structure = result["table_structure"]
+                    self.data_table.setColumnCount(2)
+                    self.data_table.setRowCount(len(structure))
+                    self.data_table.setHorizontalHeaderLabels(["Column Name", "Data Type"])
 
-                # **Set up table columns**
-                columns = list(data[0].keys())
-                self.data_table.setColumnCount(len(columns))
-                self.data_table.setRowCount(len(data))
-                self.data_table.setHorizontalHeaderLabels(columns)
-
-                # **Insert data into table**
-                for row_idx, row_data in enumerate(data):
-                    for col_idx, col_name in enumerate(columns):
-                        self.data_table.setItem(row_idx, col_idx, QTableWidgetItem(str(row_data[col_name])))
+                    for row_idx, (col_name, col_type) in enumerate(structure):
+                        self.data_table.setItem(row_idx, 0, QTableWidgetItem(col_name))
+                        self.data_table.setItem(row_idx, 1, QTableWidgetItem(col_type))
+                else:
+                    QMessageBox.information(self, "Info", "Query executed successfully!")
             else:
                 QMessageBox.critical(self, "Error", result.get("message", "Query execution failed!"))
-
         except requests.exceptions.RequestException:
             QMessageBox.critical(self, "Error", "Network Error: Unable to execute query!")
 

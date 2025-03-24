@@ -232,21 +232,37 @@ def run_query():
     if not query:
         return jsonify({"status": "error", "message": "SQL query is required"}), 400
 
-    # Only allow SELECT queries for security reasons
-    if not query.strip().lower().startswith("select"):
-        return jsonify({"status": "error", "message": "Only SELECT queries are allowed"}), 403
+    query = query.strip().lower()
 
     try:
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        columns = [desc[0] for desc in cursor.description]
-        cursor.close()
-        conn.close()
 
-        result = [dict(zip(columns, row)) for row in rows]
-        return jsonify({"status": "success", "data": result}), 200
+        # Handle "DESC" or "DESCRIBE"
+        if query.startswith("desc"):
+            table_name = query.split(" ")[1].replace(";", "")
+            cursor.execute(sql.SQL(
+                "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = {};"
+            ).format(sql.Literal(table_name)))
+            result = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return jsonify({"status": "success", "table_structure": result})
+
+        # Allow only SELECT queries for other queries
+        elif query.startswith("select"):
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+            cursor.close()
+            conn.close()
+
+            result = [dict(zip(columns, row)) for row in rows]
+            return jsonify({"status": "success", "data": result})
+
+        else:
+            return jsonify({"status": "error", "message": "Query type not supported"}), 403
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
  
