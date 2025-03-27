@@ -1,5 +1,5 @@
 Flask==2.3.2
 SQLAlchemy==2.0.16
 PyMySQL==1.1.0
-mpv==0.34.0  # Assuming mpv-python is used for playing audio
 gunicorn
+
