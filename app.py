@@ -1,8 +1,10 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 
 app = Flask(__name__)
 socketio = SocketIO(app,async_mode='gevent')
+CORS(app)
 
 # Route for Monitor (Mobile A)
 @app.route("/monitor")
