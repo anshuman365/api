@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 app = Flask(__name__)
-socketio = SocketIO(app,async_mode='gevent')
+socketio = SocketIO(app, async_mode='gevent')
 CORS(app)
 
 # Route for Monitor (Mobile A)
@@ -16,11 +16,17 @@ def monitor():
 def keyboard():
     return render_template("keyboard.html")
 
-# Handle real-time data from Mobile B
+# Handle text input from Mobile B
 @socketio.on("text_input")
 def handle_text_input(data):
-    # Broadcast the text to all connected clients (Mobile A)
+    # Broadcast text input to all connected clients
     emit("update_text", data, broadcast=True)
+
+# Handle sketch data from Mobile B
+@socketio.on("sketch_data")
+def handle_sketch_data(data):
+    # Broadcast sketch data to all connected clients
+    emit("sketch_update", data, broadcast=True)
 
 if __name__ == "__main__":
     print("Starting the server")

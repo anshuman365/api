@@ -9,13 +9,41 @@
 <body>
     <h1>Keyboard Input</h1>
     <textarea id="inputBox" rows="5" style="width: 90%; margin: auto; display: block; font-size: 18px;"></textarea>
+    
+    <h2>Sketch Area</h2>
+    <canvas id="sketchArea" width="500" height="300" style="border: 1px solid black; display: block; margin: auto;"></canvas>
+    
     <script>
         const socket = io();
         const inputBox = document.getElementById("inputBox");
+        const canvas = document.getElementById("sketchArea");
+        const ctx = canvas.getContext("2d");
 
-        // Send data to the server when input changes
+        let drawing = false;
+
+        // Send text input to the server
         inputBox.addEventListener("input", () => {
             socket.emit("text_input", { text: inputBox.value });
+        });
+
+        // Start drawing
+        canvas.addEventListener("mousedown", () => drawing = true);
+        canvas.addEventListener("mouseup", () => drawing = false);
+        canvas.addEventListener("mouseout", () => drawing = false);
+
+        // Capture mouse movements and draw
+        canvas.addEventListener("mousemove", (event) => {
+            if (!drawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            ctx.fillStyle = "black";
+            ctx.fillRect(x, y, 2, 2);
+
+            // Emit sketch data to the server
+            socket.emit("sketch_data", { x, y });
         });
     </script>
 </body>
