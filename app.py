@@ -16,17 +16,20 @@ def monitor():
 def keyboard():
     return render_template("keyboard.html")
 
-# Handle text input from Mobile B
+# Handle real-time text input from Mobile B
 @socketio.on("text_input")
 def handle_text_input(data):
-    # Broadcast text input to all connected clients
     emit("update_text", data, broadcast=True)
 
-# Handle sketch data from Mobile B
+# Handle real-time sketch data from Mobile B
 @socketio.on("sketch_data")
 def handle_sketch_data(data):
-    # Broadcast sketch data to all connected clients
-    emit("sketch_update", data, broadcast=True)
+    emit("update_sketch", data, broadcast=True)
+
+# Handle canvas clearing signal
+@socketio.on("clear_canvas")
+def handle_clear_canvas():
+    emit("clear_canvas", broadcast=True)
 
 if __name__ == "__main__":
     print("Starting the server")

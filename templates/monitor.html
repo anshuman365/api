@@ -5,31 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        #display {
+            font-size: 24px;
+            border: 1px solid #000;
+            padding: 10px;
+            width: 90%;
+            margin: auto;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
     <h1>Monitor Screen</h1>
-    <div id="display" style="font-size: 24px; border: 1px solid #000; padding: 10px; width: 90%; margin: auto;">
-        Waiting for input...
-    </div>
-    
-    <h2>Sketch Area</h2>
-    <canvas id="sketchDisplay" width="500" height="300" style="border: 1px solid black; display: block; margin: auto;"></canvas>
-    
+    <div id="display">Waiting for input...</div>
+    <canvas id="monitorCanvas" width="500" height="300"></canvas>
+
     <script>
         const socket = io();
         const displayDiv = document.getElementById("display");
-        const canvas = document.getElementById("sketchDisplay");
+        const canvas = document.getElementById("monitorCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Update text in real-time
+        // Update text input on the monitor
         socket.on("update_text", (data) => {
             displayDiv.textContent = data.text;
         });
 
-        // Update sketch in real-time
-        socket.on("sketch_update", (data) => {
-            ctx.fillStyle = "black";
-            ctx.fillRect(data.x, data.y, 2, 2);
+        // Update sketch data on the monitor
+        socket.on("update_sketch", (data) => {
+            ctx.fillStyle = data.color;
+            ctx.beginPath();
+            ctx.arc(data.x, data.y, 4, 0, Math.PI * 2); // Draw a circle to match the pen strokes
+            ctx.fill();
+        });
+
+        // Clear the canvas when the clear signal is received
+        socket.on("clear_canvas", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
     </script>
 </body>

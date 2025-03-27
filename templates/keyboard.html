@@ -5,46 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keyboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        textarea {
+            margin-bottom: 20px;
+        }
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 50%;
+            outline: none;
+        }
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 20px auto;
+            background-color: #fff;
+            touch-action: none; /* Prevent touch gestures from interfering */
+        }
+    </style>
 </head>
 <body>
     <h1>Keyboard Input</h1>
-    <textarea id="inputBox" rows="5" style="width: 90%; margin: auto; display: block; font-size: 18px;"></textarea>
-    
+    <textarea id="inputBox" rows="5" style="width: 90%; display: block; font-size: 18px;"></textarea>
+
     <h2>Sketch Area</h2>
-    <canvas id="sketchArea" width="500" height="300" style="border: 1px solid black; display: block; margin: auto;"></canvas>
-    
+    <div>
+        <button class="color-btn" style="background: red;" data-color="red"></button>
+        <button class="color-btn" style="background: blue;" data-color="blue"></button>
+        <button class="color-btn" style="background: green;" data-color="green"></button>
+        <button class="color-btn" style="background: black;" data-color="black"></button>
+        <button id="clearCanvas" style="padding: 5px 10px;">Clear</button>
+    </div>
+    <canvas id="sketchArea" width="500" height="300"></canvas>
+
     <script>
         const socket = io();
         const inputBox = document.getElementById("inputBox");
         const canvas = document.getElementById("sketchArea");
         const ctx = canvas.getContext("2d");
+        const colorButtons = document.querySelectorAll(".color-btn");
+        const clearButton = document.getElementById("clearCanvas");
 
-        let drawing = false;
+        let drawing = false; // To track if the user is drawing
+        let currentColor = "black"; // Default pen color
 
-        // Send text input to the server
+        // Handle text input
         inputBox.addEventListener("input", () => {
             socket.emit("text_input", { text: inputBox.value });
         });
 
-        // Start drawing
-        canvas.addEventListener("mousedown", () => drawing = true);
-        canvas.addEventListener("mouseup", () => drawing = false);
-        canvas.addEventListener("mouseout", () => drawing = false);
+        // Handle color change
+        colorButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                currentColor = button.getAttribute("data-color");
+            });
+        });
 
-        // Capture mouse movements and draw
-        canvas.addEventListener("mousemove", (event) => {
+        // Clear canvas locally and notify server
+        clearButton.addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            socket.emit("clear_canvas");
+        });
+
+        // Mouse events for drawing
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mousemove", draw);
+
+        // Touch events for drawing on mobile devices
+        canvas.addEventListener("touchstart", (e) => startDrawing(e, true));
+        canvas.addEventListener("touchend", stopDrawing);
+        canvas.addEventListener("touchmove", (e) => draw(e, true));
+
+        // Start drawing
+        function startDrawing(event, isTouch = false) {
+            drawing = true;
+            draw(event, isTouch); // Draw a dot immediately
+        }
+
+        // Stop drawing
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath(); // Reset the path for smoother strokes
+        }
+
+        // Draw on the canvas
+        function draw(event, isTouch = false) {
             if (!drawing) return;
 
             const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            const x = isTouch
+                ? event.touches[0].clientX - rect.left
+                : event.clientX - rect.left;
+            const y = isTouch
+                ? event.touches[0].clientY - rect.top
+                : event.clientY - rect.top;
 
-            ctx.fillStyle = "black";
-            ctx.fillRect(x, y, 2, 2);
+            ctx.fillStyle = currentColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2); // Draw a circle to simulate pen strokes
+            ctx.fill();
 
-            // Emit sketch data to the server
-            socket.emit("sketch_data", { x, y });
-        });
+            // Emit drawing data to the server
+            socket.emit("sketch_data", { x, y, color: currentColor });
+        }
     </script>
 </body>
 </html>
