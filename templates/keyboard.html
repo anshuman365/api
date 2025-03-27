@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Keyboard Input</h1>
+    <textarea id="inputBox" rows="5" style="width: 90%; margin: auto; display: block; font-size: 18px;"></textarea>
+    <script>
+        const socket = io();
+        const inputBox = document.getElementById("inputBox");
+
+        // Send data to the server when input changes
+        inputBox.addEventListener("input", () => {
+            socket.emit("text_input", { text: inputBox.value });
+        });
+    </script>
+</body>
+</html>

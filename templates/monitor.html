@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Monitor Screen</h1>
+    <div id="display" style="font-size: 24px; border: 1px solid #000; padding: 10px; width: 90%; margin: auto;">
+        Waiting for input...
+    </div>
+    <script>
+        const socket = io();
+        const displayDiv = document.getElementById("display");
+
+        // Update the monitor when data is received
+        socket.on("update_text", (data) => {
+            displayDiv.textContent = data.text;
+        });
+    </script>
+</body>
+</html>
