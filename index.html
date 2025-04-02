@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: white; }
+        input, button { padding: 10px; margin: 10px; border-radius: 5px; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        img { margin-top: 20px; max-width: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body>
+    <h1>AI Image Generator</h1>
+    <form method="post">
+        <input type="text" name="prompt" placeholder="Enter a prompt..." required>
+        <button type="submit">Generate</button>
+    </form>
+    {% if image_url %}
+        <h3>Generated Image for: "{{ prompt }}"</h3>
+        <img src="{{ image_url }}" alt="Generated Image">
+    {% endif %}
+</body>
+</html>
