@@ -6,3 +6,4 @@ diffusers
 transformers
 pillow
 gunicorn
+accelerate
